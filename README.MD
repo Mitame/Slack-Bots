@@ -1,6 +1,8 @@
-MMI-Bot Base and Test Bots for IRC
-==================================
-
+MMI-Bot Base and Test Bots for slack
+====================================
+(In development)
+------------------------------------
+ 
 These are some testbots for IRC servers.
 They are easily configurable and should be easy to make new commands for.
 Written in python.
@@ -10,7 +12,7 @@ Written in python.
 Dependencies
 ------------
 ####For everything:
-[IRC for python](https://pypi.python.org/pypi/irc)
+[Slack API implementation for python](https://github.com/os/slacker)
 
 ####For Commands/fun (These can be disabled)
 [pyfiglet](https://pypi.python.org/pypi/pyfiglet) for generating ascii clocks in ```asciiClock()``` command.
