@@ -30,7 +30,7 @@ Dependencies
 
 Running a bot
 -------------
-1. Copy ```conf/defaultconf.py``` to ```conf/__init__.py``` and edit it to your liking.
+1. Edit ```conf/__init__.py``` to include you're configurations (most importantly, your apikey)
 2. Copy mainbot.py and edit to your liking. Comment out lines to remove commands.
 
 Creating commands
@@ -62,4 +62,4 @@ class newCommand(Command):
         "do stuff"
 ```
 
-The bot will receive messages from both the channel it has joined and private messages. Use ```self.pubMsg(event,message)``` and ```self.privMsg(event,message)``` to send channel and private messages, respectively.
+The bot will receive messages from both the channel it has joined and private messages. Use ```self.bot.send_PubMsg(message)```, ```self.bot.send_PrivMsg(userID,message)``` and ```self.bot.send_reply(event,message)``` to send channel, private and reply messages, respectively.
