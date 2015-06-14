@@ -13,6 +13,7 @@ Dependencies
 ------------
 ####For everything:
 [Slack API implementation for Python](https://github.com/os/slacker)
+
 [Websockets in Python](https://pypi.python.org/pypi/websocket-client)
 
 ####For Commands/fun (These can be disabled)
