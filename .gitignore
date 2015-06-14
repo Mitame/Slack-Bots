@@ -64,6 +64,9 @@ logcat.txt
 *~
 
 #Project specific files
-conf.py
+
+conf/__init__.py
+conf/mysql.py
+
 
 *.apikey
