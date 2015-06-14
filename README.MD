@@ -12,7 +12,8 @@ Written in python.
 Dependencies
 ------------
 ####For everything:
-[Slack API implementation for python](https://github.com/os/slacker)
+[Slack API implementation for Python](https://github.com/os/slacker)
+[Websockets in Python](https://pypi.python.org/pypi/websocket-client)
 
 ####For Commands/fun (These can be disabled)
 [pyfiglet](https://pypi.python.org/pypi/pyfiglet) for generating ascii clocks in ```asciiClock()``` command.
