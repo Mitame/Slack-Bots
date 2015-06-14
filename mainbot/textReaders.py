@@ -19,16 +19,16 @@ class TextReader():
         self.bot.registerTextReader(self)
 
 
-    def on_call(self,event,positions):
+    def on_call(self, positions):
         print("TextReader '%s' has not been configured to do anything when called." % type(self))
 
-    def privMsg(self,event,msg):
+    def privMsg(self, msg):
             if type(event) == str:
                 self.bot.connection.notice(event,msg)
             else:
                 self.bot.connection.notice(event.source.nick,msg)
 
-    def pubMsg(self,event,msg):
+    def pubMsg(self, msg):
         self.bot.sendPubMsg(event,msg)
 
 
@@ -43,7 +43,7 @@ class youTubeScanner(TextReader):
         self.api = build("youtube","v3")
         print("Done")
 
-    def on_call(self,event,positions):
+    def on_call(self, positions):
         id = positions.group(0)
         videoData = self.api.videos().list(part="snippet",id=id,key=self.apikey).execute()
         try:
@@ -77,7 +77,7 @@ class imgurScanner(TextReader):
         self.client = imgurpython.ImgurClient(self.id,self.secret)
         print("Done")
 
-    def on_call(self,event,positions):
+    def on_call(self, positions):
         data = positions.group(0).split("/")
         if len(data) != 1:
             print("Not an image")
@@ -106,4 +106,4 @@ class imgurScanner(TextReader):
 
 
 
-        self.pubMsg(event,text)
+        self.pubMsg(text)

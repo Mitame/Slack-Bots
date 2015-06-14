@@ -15,7 +15,7 @@ class slap(Command):
     
     def on_call(self, event, *args):
         print(args[0])
-        self.bot.connection.privmsg(self.bot.channelName,"\001ACTION slapped %s.\001" % args[0])
+        self.bot.send_PubMsg("*slapped %s*" % args[0])
 
 class asciiClock(Command):
     arguments = []
@@ -27,11 +27,9 @@ class asciiClock(Command):
     
     def on_call(self,event,*args):
         font = pyfiglet.Figlet()
-        
-        x = font.renderText(str(time.ctime()).split(" ")[4])
-        for line in x.split("\n"):
-            if line != "":
-                self.pubMsg(event,line)
+        print(str(time.ctime()).split(" "))
+        x = font.renderText(str(time.ctime()).split(" ")[3])
+        self.bot.send_PubMsg("```"+x+"```")
         
 class cowsay(Command):
     arguments = ["str"]
@@ -64,10 +62,6 @@ class cowsay(Command):
                 text.append(arg)
         print("Executing %s." % ("cowsay " + " ".join(newArgs) + " " +shlex.quote(" ".join(text))))
         y = os.popen("cowsay " + " ".join(newArgs) + " " +shlex.quote(" ".join(text)))
-        for line in y.read().split("\n"):
-            self.pubMsg(event,line)
-
-
-    
-                                   
-        
+        self.bot.send_PubMsg("```"+y.read()+"```")
+        # for line in y.read().split("\n"):
+        #     self.pubMsg(event,line)

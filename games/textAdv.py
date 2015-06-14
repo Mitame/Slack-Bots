@@ -1,6 +1,7 @@
 import threading
 import os
 import pexpect
+import time
 
 from mainbot.commands import Command
 
@@ -39,7 +40,8 @@ class cca(Command):
     def outputLoop(self,event,sub):
         try:
             while 1:
-                self.pubMsg(event,str(sub.readline(),"utf8").strip("\r\n"))
+                self.bot.send_PubMsg(str(sub.readline(),"utf8").strip("\r\n"))
+                time.sleep(1/5)
         
         except KeyboardInterrupt:
             pass

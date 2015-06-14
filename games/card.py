@@ -146,6 +146,7 @@ class blackjack(Command):
         elif base == "start":
             if self.gameInProgress:
                 self.privMsg(event,)
+                return
             self.start(event)
         
         elif base == "hit":
@@ -165,7 +166,7 @@ class blackjack(Command):
     
     def start(self,event):
         if len(self.players) == 0:
-            self.pubMsg(event,self.messages["noPlayers"])
+            self.bot.send_PubMsg(self.messages["noPlayers"])
             return
         
         self.gameInProgress = True
@@ -181,13 +182,13 @@ class blackjack(Command):
             self.curPlayers[player] = blackjack.Hand(player)
             self.curPlayers[player].addCard(*self.curStack.deal(2))
         
-        self.pubMsg(event, self.messages["newgame"]+", ".join(self.playerOrder))
+        self.bot.send_PubMsg(self.messages["newgame"]+", ".join(self.playerOrder))
         self.passTurn(event, 0)
         
         
     def showHand(self,event):
-        self.curPlayers(event.source.nick).sort()
-        self.privMsg(event,self.messages["cards"] % ( ", ".join(self.getCurrentHand().cards),int(self.getCurrentHand())))
+        self.curPlayers[event.user].sort()
+        self.bot.send_PrivMsg(event.user, self.messages["cards"] % ( ", ".join(self.getCurrentHand().cards),int(self.getCurrentHand())))
             
     def passTurn(self,event,curplayer=False):
         print(len(self.playerOrder))

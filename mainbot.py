@@ -5,11 +5,9 @@ from conf import settings
 
 def main():
     from mainbot.main import BaseBot
-    bot = BaseBot(irc.bot.ServerSpec(settings.host,settings.port,settings.servPass),
-                    settings.channel,settings.name,settings.callSign,
-                    settings.manOpList,settings.chatLog,
-                    settings.commandPrefix,settings.textPrefix,
-                    settings.textPostfix,settings.textReplacements,settings.nickPass,settings.nickServ)
+    bot = BaseBot(settings.apikey, settings.channel, settings.username, \
+                  settings.callSign, settings.manOpList, settings.commandPrefix, \
+                  settings.filterBotMessages, settings.textReplacements)
     
     import mainbot.commands as commands
     commands.ping(bot)
@@ -19,7 +17,6 @@ def main():
     commands.help(bot)
     commands.flushLog(bot)
     commands.say(bot)
-    commands.op(bot)
    
     import games.textAdv
     games.textAdv.cca(bot)
@@ -30,11 +27,11 @@ def main():
     Commands.fun.slap(bot)
 
     import mainbot.textReaders
-    mainbot.textReaders.youTubeScanner(bot,open("apikeys/youtube.apikey","r").read().strip())
+    # mainbot.textReaders.youTubeScanner(bot, open("apikeys/youtube.apikey", "r").read().strip())
 
-    mainbot.textReaders.imgurScanner(bot,*open("apikeys/imgur.apikey").read().strip().split("\n"))
+    # mainbot.textReaders.imgurScanner(bot, *open("apikeys/imgur.apikey").read().strip().split("\n"))
 
-    bot.start()
+    bot.start(1/30)
 
 if __name__ == "__main__":
     main()
