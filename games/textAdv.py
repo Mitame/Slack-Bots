@@ -14,37 +14,34 @@ class cca(Command):
     defaultArgs = []
     callName = "cca"
 
-    def __init__(self,bot):
+    def __init__(self, bot):
         #requirement check
         for directory in os.environ["PATH"].split(":"):
-            if os.path.exists(os.path.join(directory,"adventure")):
-                Command.__init__(self,bot)
+            if os.path.exists(os.path.join(directory, "adventure")):
+                Command.__init__(self ,bot)
                 break
         else:
             raise FileNotFoundError("Executable 'adventure' was not found. \n\
             Try installing 'bsdgames' or disable the 'cca' command.")
 
-    def on_call(self,event,*args):
+    def on_call(self, event, *args):
         base = args[0].lower()
         if base == "start":
-            self.sub = pexpect.spawn("adventure",args[1:] if len(args) > 1 else [],timeout=None)
-            
-            self.printThread = threading.Thread(target = self.outputLoop, name = "output", args = (event,self.sub))
+            self.sub = pexpect.spawn("adventure", args[1:] if len(args) > 1 else [], timeout=None)
+            self.printThread = threading.Thread(target=self.outputLoop, name="output", args=(event, self.sub))
             self.printThread.start()
+
         elif base == "run":
             self.sub.sendline(" ".join(args[1:]))
             
-    def on_die(self,event):
-        self.sub.kill()
+    def on_die(self, event):
+        self.sub.kill("SIGTERM")
     
-    def outputLoop(self,event,sub):
+    def outputLoop(self, event, sub):
         try:
             while 1:
-                self.bot.send_PubMsg(str(sub.readline(),"utf8").strip("\r\n"))
+                self.bot.send_reply(event, str(sub.readline(), "utf8").strip("\r\n"))
                 time.sleep(1/5)
         
         except KeyboardInterrupt:
             pass
-        
-        
-        

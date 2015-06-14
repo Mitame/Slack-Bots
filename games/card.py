@@ -7,9 +7,10 @@ from mainbot.commands import Command
 class cardClasses():
     
     class Card():
-        suits = ["H","D","C","S"]
-        ranks = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
-        def __init__(self,suit,rank):
+        suits = ["H", "D", "C", "S"]
+        ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+
+        def __init__(self, suit, rank):
             self.suit = suit
             self.rank = rank
         
@@ -22,7 +23,7 @@ class cardClasses():
         def __repr__(self):
             return str(self)
         
-        def index(self,order="SR"):
+        def index(self, order="SR"):
             if order == "SR":
                 return self.suits.index(self.suit)+self.ranks.index(self.rank)*4
             elif order == "RS":
@@ -30,39 +31,39 @@ class cardClasses():
             else:
                 raise ValueError
         
-    class Stack():
+    class Stack:
         
         def __init__(self):
             self.reset()
         
-        def deal(self,count):
+        def deal(self, count):
             rtr = []
             for x in range(count):
-                rtr.append(self.cards.pop(random.randint(0,len(self.cards)-1)))
+                rtr.append(self.cards.pop(random.randint(0, len(self.cards)-1)))
             return rtr
         
         def reset(self):
             self.cards = []
             for suit in cardClasses.Card.suits:
                 for rank in cardClasses.Card.ranks:
-                    self.cards.append(cardClasses.Card(suit,rank))
+                    self.cards.append(cardClasses.Card(suit, rank))
         
     class Hand():
-        def __init__(self,name):
+        def __init__(self, name):
             self.cards = []
             self.name = name
             self.points = 0
         
-        def addCard(self,*cards):
+        def addCard(self, *cards):
             self.cards.extend(cards)
         
-        def sort(self,order="SR"):
+        def sort(self, order="SR"):
             self.cards.sort(cardClasses.Card.index)
             
 
 class blackjack(Command):
     class Card(cardClasses.Card):
-        bjValue = [0,2,3,4,5,6,7,8,9,10,10,10,10]
+        bjValue = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
     
     class Stack(cardClasses.Stack):
         pass
@@ -86,7 +87,7 @@ class blackjack(Command):
             
             return result
         
-        def getScore(self,cardCount=True):
+        def getScore(self, cardCount=True):
             x = self.__int__()
             
             if x > 21:
@@ -117,35 +118,32 @@ class blackjack(Command):
                 "stick":"%s stuck.",
                 "gameScore":"The scores for this round were:",
                 "totalScore":"The total scores are",
-                
-    }
-    
-                 
-    def __init__(self,bot):
-        Command.__init__(self,bot)
+                }
+
+    def __init__(self, bot):
+        Command.__init__(self, bot)
         self.players = []
         self.gameInProgress = False
         self.totalScores = {}
         
-    def on_call(self,event,*args):
+    def on_call(self, event, *args):
         args = " ".join(args).lower().split(" ")
         base = args[0]
         print(base)
         
         if base == "join":
-            if event.source.nick not in self.players:
-                self.players.append(event.source.nick)
-            self.pubMsg(event,self.messages["newPlayer"] % event.source.nick)
-            self.totalScores[event.source.nick] = 0
+            if event.user not in self.players:
+                self.players.append(event.user)
+            self.bot.send_PubMsg(self.messages["newPlayer"] % self.bot.getName(event.user))
+            self.totalScores[event.user] = 0
             
-        elif base in ("quit","leave"):
-            if event.source.nick in self.players:
-                self.players.remove(event.source.nick)
-            self.pubMsg(event,self.messages["lostPlayer"] % event.source.nick)
+        elif base in ("quit", "leave"):
+            if self.bot.getName(event.user) in self.players:
+                self.players.remove(event.user)
+            self.bot.send_PubMsg(self.messages["lostPlayer"] % self.bot.getName(event.user))
         
         elif base == "start":
             if self.gameInProgress:
-                self.privMsg(event,)
                 return
             self.start(event)
         
@@ -158,13 +156,12 @@ class blackjack(Command):
                 self.stick(event)      
         
         elif base == "scores":
-            self.getTotalScores(event)  
-            
-        
+            self.getTotalScores(event)
+
     def getCurrentHand(self):
         return self.curPlayers[self.playerOrder[self.curplayer]]        
     
-    def start(self,event):
+    def start(self, event):
         if len(self.players) == 0:
             self.bot.send_PubMsg(self.messages["noPlayers"])
             return
@@ -184,93 +181,89 @@ class blackjack(Command):
         
         self.bot.send_PubMsg(self.messages["newgame"]+", ".join(self.playerOrder))
         self.passTurn(event, 0)
-        
-        
-    def showHand(self,event):
+
+    def showHand(self, event):
         self.curPlayers[event.user].sort()
-        self.bot.send_PrivMsg(event.user, self.messages["cards"] % ( ", ".join(self.getCurrentHand().cards),int(self.getCurrentHand())))
+        self.bot.send_PrivMsg(event.user, self.messages["cards"] % ( ", ".join(self.getCurrentHand().cards), int(self.getCurrentHand())))
             
-    def passTurn(self,event,curplayer=False):
+    def passTurn(self, event, curplayer=False):
         print(len(self.playerOrder))
         print(self.curplayer)
         if curplayer is False:
             self.curplayer += 1
             while self.curplayer != len(self.playerOrder) and not self.bot.channels[self.bot.channelName].has_user(self.playerOrder[self.curplayer]):
-                self.pubMsg(event,self.messages["playerleft"] % self.playerOrder[self.curplayer])
+                self.bot.send_PubMsg(self.messages["playerleft"] % self.playerOrder[self.curplayer])
                 self.curplayer += 1
-                
-                
+
             if self.curplayer % len(self.playerOrder) == 0:
                 self.endGame(event)
                 return
         else:
             self.curplayer = curplayer
-        self.pubMsg(event,self.messages["newturn"] % self.playerOrder[self.curplayer])
-        self.privMsg(self.playerOrder[self.curplayer], self.messages["playInstructions"] % (self.bot.callsign,self.bot.callsign))
-        self.privMsg(self.playerOrder[self.curplayer], self.messages["cards"] % ( ", ".join(str(card) for card in self.getCurrentHand().cards),int(self.getCurrentHand())))
+        self.bot.send_PubMsg(self.messages["newturn"] % self.playerOrder[self.curplayer])
+        self.bot.send_PrivMsg(self.playerOrder[self.curplayer], self.messages["playInstructions"] % (self.bot.callsign, self.bot.callsign))
+        self.bot.send_PrivMsg(self.playerOrder[self.curplayer], self.messages["cards"] % (", ".join(str(card) for card in self.getCurrentHand().cards), int(self.getCurrentHand())))
         
-    def hit(self,event):
-        self.pubMsg(event,self.messages["hit"] % event.source.nick)
+    def hit(self, event):
+        self.bot.send_PubMsg(self.messages["hit"] % self.bot.getName(event.user))
         x = self.curStack.deal(1)
         self.getCurrentHand().addCard(*x)
-        self.privMsg(event,self.messages["newcard"] % x[0])
+        self.bot.send_PrivMsg(event.user, self.messages["newcard"] % x[0])
+
         if int(self.getCurrentHand()) > 21:
-            self.privMsg(event, self.messages["youbust"])
-            self.pubMsg(event, self.messages["bust"] % event.source.nick)
+            self.bot.send_PrivMsg(event.user, self.messages["youbust"])
+            self.bot.send_PubMsg(self.messages["bust"] % self.bot.getName(event.user))
             self.passTurn(event)
         else:
-            self.privMsg(event,self.messages["cards"] % ( ", ".join(str(card) for card in self.getCurrentHand().cards),int(self.getCurrentHand())))
+            self.bot.send_PrivMsg(event.user, self.messages["cards"] % (", ".join(str(card) for card in self.getCurrentHand().cards), int(self.getCurrentHand())))
             
-    def stick(self,event):
-        self.pubMsg(event,self.messages["stick"] % event.source.nick)
+    def stick(self, event):
+        self.bot.send_PubMsg(self.messages["stick"] % self.bot.getName(event.user))
         self.passTurn(event)
     
-    def endGame(self,event):
+    def endGame(self, event):
         self.gameInProgress = False
         self.playersort = list(self.curPlayers.values())
         self.playersort.sort(key=self.Hand.getScore)
         for x in self.playersort:
-            print(x.name,x.getScore())
+            print(x.name, x.getScore())
         
         self.playersort.reverse()
         self.totalScores[x.name] += 1
-        self.pubMsg(event,self.messages["endgame"] % (self.playersort[0].name,self.bot.callsign,self.bot.callsign))
+        self.bot.send_PubMsg(self.messages["endgame"] % (self.playersort[0].name, self.bot.callsign, self.bot.callsign))
         self.printScores(event)
         
-    def printScores(self,event):
-        self.pubMsg(event,self.messages["gameScore"])
+    def printScores(self, event):
+        self.bot.send_PubMsg(self.messages["gameScore"])
         for x in self.playersort:
-            self.pubMsg(event,(x.name+" | "+str(x.getScore(False))+" + "+str(len(x.cards))))
-        
-    
-    def getTotalScores(self,event):
-        self.pubMsg(event,self.messages["totalScore"])
+            self.bot.send_PubMsg((x.name+" | "+str(x.getScore(False))+" + "+str(len(x.cards))))
+
+    def getTotalScores(self, event):
+        self.bot.send_PubMsg(self.messages["totalScore"])
         for x in self.totalScores.keys():
-            self.pubMsg(event,(x+" | "+str(self.totalScores[x])))
-            
-    
-    def checkPermissions(self,event,*args):
+            self.bot.send_PrivMsg(event.user, (x+" | "+str(self.totalScores[x])))
+
+    def checkPermissions(self, event, *args):
         if len(args) == 0:
             return False
         base = args[0].lower()
-        if base in ["hit","stick"]:
-            if event.source.nick != self.playerOrder[self.curplayer]:
-                self.privMsg(event,"Only the current player can use this command.")
+        if base in ["hit", "stick"]:
+            if event.user != self.playerOrder[self.curplayer]:
+                self.bot.send_PrivMsg(event.user, "Only the current player can use this command.")
                 return False
             else:
                 return True
         
-        elif base in ["join","leave","quit","scores"]:
+        elif base in ["join", "leave", "quit", "scores"]:
             return True
         
         elif base in ["start"]:
-            if self.bot.getPermLevel(event) >= 3:
+            if self.bot.getPermLevel(event.user) >= 3:
                 return True
             else:
                 return False
-                
-    
-    def checkArgs(self,event,*args):
+
+    def checkArgs(self, event, *args):
         return True
         
 
@@ -282,69 +275,69 @@ class gofish(Command):
     defaultArgs = []
     callName = "gf"
     
-    messages = {"newturn":"%s, it's your turn!",
-                "cards":"You currently have [%s]",
-                "playInstructions":"Say `%s:gf help` if you need help with commands. Say `%s:gf rules` or look on wikipedia for the rules.",
-                "endgame":"The game has ended and %s won. Say `%s:gf join` to join or `%s:gf leave` to leave.",
-                "newPlayer":"%s has joined GoFish and will be playing in the next game.",
-                "newgame":"GoFish has started. The current players are: ",
-                "newcard":"You got %s.",
-                "lostPlayer":"%s has left GoFish.",
-                "lowPlayers":"The game must have atleast three participants in order to start.",
+    messages = {"newturn": "%s, it's your turn!",
+                "cards": "You currently have [%s]",
+                "playInstructions": "Say `%s:gf help` if you need help with commands. Say `%s:gf rules` or look on wikipedia for the rules.",
+                "endgame": "The game has ended and %s won. Say `%s:gf join` to join or `%s:gf leave` to leave.",
+                "newPlayer": "%s has joined GoFish and will be playing in the next game.",
+                "newgame": "GoFish has started. The current players are: ",
+                "newcard": "You got %s.",
+                "lostPlayer": "%s has left GoFish.",
+                "lowPlayers": "The game must have atleast three participants in order to start.",
                 "playerleft": "%s has left the channel. Continuing game without them.",
-                "gameScore":"The scores for this round were:",
-                "totalScore":"The total scores are:",
-                "ingame":"You are already in the game.",
-                "invalidCommand":"`%s` is an invalid command. Type `%s:gf help` for a list of commands.",
-                "invalidCard":"`%s` is not a valid card. Please choose from [A,2,3,4,5,6,7,8,9,10,J,Q,K].",
-                "askCards":"Does %s have any %ss?",
-                "gotCards":"%s got %s %ss from %s.",
-                "noCards":"No, Go Fish!",
-                "poolCard":"You got a %s from the pool.",
-                "notPlaying":"%s is not playing GoFish right now.",
+                "gameScore": "The scores for this round were:",
+                "totalScore": "The total scores are:",
+                "ingame": "You are already in the game.",
+                "invalidCommand": "`%s` is an invalid command. Type `%s:gf help` for a list of commands.",
+                "invalidCard": "`%s` is not a valid card. Please choose from [A,2,3,4,5,6,7,8,9,10,J,Q,K].",
+                "askCards": "Does %s have any %ss?",
+                "gotCards": "%s got %s %ss from %s.",
+                "noCards": "No, Go Fish!",
+                "poolCard": "You got a %s from the pool.",
+                "notPlaying": "%s is not playing GoFish right now.",
                 "completeSet": "%s just completed a set of %ss. He has earned 1 point.",
-                "mustHaveCard":"You must have atleast 1 %s card in order to ask for it."
+                "mustHaveCard": "You must have atleast 1 %s card in order to ask for it."
     }
     
-    def __init__(self,bot):
-        Command.__init__(self,bot)
+    def __init__(self, bot):
+        Command.__init__(self, bot)
         self.players = []
         self.gameInProgress = False
         self.totalScores = {}
 
-    def checkPermissions(self,event,*args):
+    def checkPermissions(self, event, *args):
         base = args[0].lower()
-        print(base,"permissions")
-        if base in ["join","leave"]: return True
+        print(base, "permissions")
+        if base in ["join", "leave"]:
+            return True
         elif base in ["start"]:
-            return event.source.nick in self.players
+            return event.user in self.players
         elif self.gameInProgress:
             if base in ["cards"]:
                 return True
             else:
-                if self.playerOrder[self.curplayer] == event.source.nick:
+                if self.playerOrder[self.curplayer] == event.user:
                     return args[0] in self.playerOrder
 
         return False
     
-    def checkArgs(self,event,*args):
+    def checkArgs(self, event, *args):
         base = args[0].lower()
-        if base in ["join","leave","start"]:
+        if base in ["join", "leave", "start"]:
             return len(args) == 1
         else:
             if self.gameInProgress: 
                 if args[0] in self.playerOrder:
                     if args[1].upper() not in cardClasses.Card.ranks:
-                        self.privMsg(event,self.messages["invalidCard"] % args[1])
+                        self.bot.send_PrivMsg(event.user, self.messages["invalidCard"] % args[1])
                         return False
                     else:
                         return True
                 else:
-                    self.privMsg(event,self.messages["notPlaying"] % args[0])
+                    self.bot.send_PrivMsg(event.user, self.messages["notPlaying"] % args[0])
                     return False
-            
-        
-    def on_call(self,event,*args):
+
+    def on_call(self, event, *args):
         base = args[0].lower()
         
         if base == "start":
@@ -358,21 +351,20 @@ class gofish(Command):
         
         else:
             print(args)
-            self.play(event,*args)
-        
+            self.play(event, *args)
     
-    def play(self,event,*args):
+    def play(self, event, *args):
         target = args[0]
         cardRank = args[1].upper()
         
-        for card in self.curPlayers[event.source.nick].cards:
+        for card in self.curPlayers[event.user].cards:
             if card.rank == cardRank:
                 break
         else:
-            self.privMsg(event,self.messages["mustHaveCard"] % cardRank)
+            self.bot.send_PrivMsg(event.user, self.messages["mustHaveCard"] % cardRank)
             return
         
-        self.pubMsg(event,self.messages["askCards"] % args)
+        self.bot.send_PubMsg(self.messages["askCards"] % args)
         targetCards = self.curPlayers[args[0]].cards
         
         gotCard = []
@@ -383,40 +375,37 @@ class gofish(Command):
                 gotCard.append(card)
         
         if gotCard:
-            self.pubMsg(event,self.messages["gotCards"] % (event.source.nick, str(len(gotCard)),args[1],target))
-            self.privMsg(event,self.messages["newcard"] % ", ".join(str(card) for card in gotCard))
+            self.bot.send_PubMsg(self.messages["gotCards"] % (self.bot.getName(event.user), str(len(gotCard)),args[1],target))
+            self.bot.send_PrivMsg(event.user, self.messages["newcard"] % ", ".join(str(card) for card in gotCard))
         else:
-            self.pubMsg(event,self.messages["noCards"])
+            self.bot.send_PubMsg(self.messages["noCards"])
             card = self.curStack.deal(1)
-            self.privMsg(event,self.messages["poolCard"] % card)
-            self.curPlayers[event.source.nick].cards.append(card)
+            self.bot.send_PrivMsg(event.user, self.messages["poolCard"] % card)
+            self.curPlayers[event.user].cards.append(card)
         
         self.checkHand(event)
         self.nextTurn(event)
         
-    def join(self,event):
-        if event.source.nick not in self.players:
-            self.players.append(event.source.nick)
-            self.pubMsg(event,self.messages["newPlayer"] % event.source.nick)
+    def join(self, event):
+        if self.bot.getName(event.user) not in self.players:
+            self.players.append(event.user)
+            self.bot.send_PubMsg(self.messages["newPlayer"] % self.bot.getName(event.user))
         else:
-            self.privMsg(event,self.messages["ingame"] % self.bot.callsign)
+            self.bot.send_PrivMsg(event.user, self.messages["ingame"] % self.bot.callsign)
 
-    
-    def leave(self,event):
-        if event.source.nick in self.players:
-            self.players.remove(event.source.nick)
-            self.pubMsg(event,self.messages["lostPlayer"] % event.source.nick)
+    def leave(self, event):
+        if event.user in self.players:
+            self.players.remove(event.user)
+            self.bot.send_PubMsg(self.messages["lostPlayer"] % self.bot.getName(event.user))
         else:
             pass
 
-
     def getCurrentHand(self):
-        return self.curPlayers[self.playerOrder[self.curplayer]]        
-    
-    
-    def checkHand(self,event):
+        return self.curPlayers[self.playerOrder[self.curplayer]]
+
+    def checkHand(self, event):
         cardCount = {}
-        nick = event if type(event) == str else event.source.nick
+        nick = event if type(event) == str else event.user
         for card in self.curPlayers[nick].cards:
             try:
                 cardCount[card.rank] += 1
@@ -425,13 +414,13 @@ class gofish(Command):
         
         for rank in cardCount.keys():
             if cardCount[rank] == 4:
-                self.pubMsg(event,self.messages["completeSet"] % (nick,rank))
+                self.bot.send_PubMsg(self.messages["completeSet"] % (nick,rank))
                 self.curPlayers[nick].score += 1
     
-    def startgame(self,event):
+    def startgame(self, event):
         #Don't allow few players
         if len(self.players) < 3:
-            self.pubMsg(event,self.messages["lowPlayers"])
+            self.bot.send_PubMsg(self.messages["lowPlayers"])
             return
         
         #set game variables
@@ -441,29 +430,28 @@ class gofish(Command):
         self.playerOrder = []
         self.curplayer = 0
         
-        #add currently joined players in random order
+        # add currently joined players in random order
         temp = copy.deepcopy(self.players)
         for x in range(len(temp)):
-            self.playerOrder.append(temp.pop(random.randint(0,len(temp)-1)))
+            self.playerOrder.append(temp.pop(random.randint(0, len(temp)-1)))
         
-        #give all players a hand and 7 cards
+        # give all players a hand and 7 cards
         for player in self.playerOrder:
             self.curPlayers[player] = cardClasses.Hand(player)
             self.curPlayers[player].addCard(*self.curStack.deal(7))
             self.checkHand(player)
         
-        #say the game is starting and pass the turn to the first player
-        self.pubMsg(event, self.messages["newgame"]+", ".join(self.playerOrder))
+        # say the game is starting and pass the turn to the first player
+        self.bot.send_PubMsg(self.messages["newgame"] + ", ".join(self.bot.getName(x) for x in self.playerOrder))
         self.showAllHands(event)
         self.nextTurn(event, 0)
-    
-    
-    def nextTurn(self,event,playerIndex = -1):
+
+    def nextTurn(self, event, playerIndex = -1):
         if playerIndex == -1:
             playerIndex = self.curplayer + 1
         
         while playerIndex != len(self.curPlayers) and not self.bot.channels[self.bot.channelName].has_user(self.playerOrder[playerIndex]):
-            self.pubMsg(event,self.messages["playerleft"] % self.playerOrder[playerIndex])
+            self.bot.send_PubMsg(self.messages["playerleft"] % self.bot.getName(self.playerOrder[playerIndex]))
             self.players.remove(self.playerOrder[playerIndex])
             playerIndex += 1
         
@@ -471,19 +459,16 @@ class gofish(Command):
             self.nextTurn(event, 0)
         else:
             self.curplayer = playerIndex
-            self.pubMsg(event,self.messages["newturn"] % self.playerOrder[self.curplayer])
-        
-    
-    def showHand(self,event):
-        self.curPlayers[event.source.nick].sort()
-        self.privMsg(event,self.messages["cards"] % ( ", ".join(self.getCurrentHand().cards),int(self.getCurrentHand())))
-    
-    
-    def endGame(self,event):
+            self.bot.send_PubMsg(self.messages["newturn"] % self.bot.getName(self.playerOrder[self.curplayer]))
+
+    def showHand(self, event):
+        self.curPlayers[event.user].sort()
+        self.bot.send_PrivMsg(event.user, self.messages["cards"] % ( ", ".join(self.getCurrentHand().cards), int(self.getCurrentHand())))
+
+    def endGame(self, event):
         self.gameInProgress = False
     
-    def showAllHands(self,event):
+    def showAllHands(self, event):
         for x in self.playerOrder:
             self.curPlayers[x].sort()
-            self.privMsg(x,self.messages["cards"] % ", ".join(str(y) for y in self.curPlayers[x].cards))
-        
+            self.bot.send_PrivMsg(x, self.messages["cards"] % ", ".join(str(y) for y in self.curPlayers[x].cards))

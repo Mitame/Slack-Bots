@@ -15,8 +15,8 @@ def main():
     commands.cnJoke(bot)
     commands.vote(bot)
     commands.help(bot)
-    commands.flushLog(bot)
     commands.say(bot)
+    commands.set(bot)
    
     import games.textAdv
     games.textAdv.cca(bot)
@@ -26,10 +26,13 @@ def main():
     Commands.fun.cowsay(bot)
     Commands.fun.slap(bot)
 
+    import games.card
+    games.card.blackjack(bot)
+
     import mainbot.textReaders
     # mainbot.textReaders.youTubeScanner(bot, open("apikeys/youtube.apikey", "r").read().strip())
 
-    # mainbot.textReaders.imgurScanner(bot, *open("apikeys/imgur.apikey").read().strip().split("\n"))
+    mainbot.textReaders.imgurScanner(bot, *open("apikeys/imgur.apikey").read().strip().split("\n"))
 
     bot.start(1/30)
 

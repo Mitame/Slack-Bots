@@ -5,6 +5,7 @@ import shlex
 from mainbot.commands import Command
 import pyfiglet
 
+
 class slap(Command):
     arguments = ["str"]
     permissionLevel = 3
@@ -16,6 +17,7 @@ class slap(Command):
     def on_call(self, event, *args):
         print(args[0])
         self.bot.send_PubMsg("*slapped %s*" % args[0])
+
 
 class asciiClock(Command):
     arguments = []
@@ -30,7 +32,8 @@ class asciiClock(Command):
         print(str(time.ctime()).split(" "))
         x = font.renderText(str(time.ctime()).split(" ")[3])
         self.bot.send_PubMsg("```"+x+"```")
-        
+
+
 class cowsay(Command):
     arguments = ["str"]
     permissionLevel = 0
@@ -42,7 +45,7 @@ class cowsay(Command):
     withArguments = ["-e","-f","-T","-W"]
     withoutArguments = ["-b", "-d", "-g", "-h", "-l", "-L", "-n", "-N", "-p", "-s", "-t", "-w", "-y"]
 
-    def on_call(self,event,*args):
+    def on_call(self, event, *args):
         args = list(args)
         newArgs = []
         text = []
@@ -57,11 +60,9 @@ class cowsay(Command):
             elif arg in self.withoutArguments:
                 newArgs.append(arg)
             elif arg[0] == "-":
-                self.privMsg(event,"Invalid argument '%s'." % arg)
+                self.privMsg(event, "Invalid argument '%s'." % arg)
             else:
                 text.append(arg)
-        print("Executing %s." % ("cowsay " + " ".join(newArgs) + " " +shlex.quote(" ".join(text))))
-        y = os.popen("cowsay " + " ".join(newArgs) + " " +shlex.quote(" ".join(text)))
-        self.bot.send_PubMsg("```"+y.read()+"```")
-        # for line in y.read().split("\n"):
-        #     self.pubMsg(event,line)
+        print("Executing %s." % ("cowsay " + " ".join(newArgs) + " " + shlex.quote(" ".join(text))))
+        y = os.popen("cowsay " + " ".join(newArgs) + " " + shlex.quote(" ".join(text)))
+        self.bot.send_PubMsg("```" + str(y.read(), "utf8") + "```")
