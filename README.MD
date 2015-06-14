@@ -48,11 +48,11 @@ Next, set the variables for the command that the bot reads when calling it to ch
 ```python
 class newCommand(Command):
     arguments = ["str"]
-        permissionLevel = 3
-        permitExtraArgs = False
-        manArgCheck = False
-        defaultArgs = []
-        callName = "new"
+    permissionLevel = 3
+    permitExtraArgs = False
+    manArgCheck = False
+    defaultArgs = []
+    callName = "new"
 ```
 When a command is recieved and is allowed to be executed, ```Commands.on_call(self,event,*args)``` is called for the command. Add a class method to recieve this.
 
